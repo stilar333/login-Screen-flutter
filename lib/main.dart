@@ -29,7 +29,7 @@ class MyLoginPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Inicio de Sesion"),
       ),
-      body: SizedBox(
+      body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.all(50.0),
           child: Column(
