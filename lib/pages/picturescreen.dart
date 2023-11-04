@@ -252,6 +252,7 @@ class _PictureScreenState extends State<PictureScreen> {
           content: Text('La imagen se ha subido exitosamente.'),
           backgroundColor: Colors.green,
         ),
+        
       );
 
       return response;

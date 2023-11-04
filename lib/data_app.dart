@@ -16,4 +16,5 @@ class AppState with ChangeNotifier {
     _qrCode = code;
     notifyListeners(); 
   }
+  
 }

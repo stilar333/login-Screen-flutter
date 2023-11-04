@@ -144,6 +144,7 @@ class HomePage extends StatelessWidget {
           content: Text('La informacion se ha subido exitosamente.'),
           backgroundColor: Colors.green,
         ),
+        
       );
 
       }

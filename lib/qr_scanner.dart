@@ -33,6 +33,7 @@ class _QRCodeWidgetState extends State<QRCodeWidget>{
       });
      });
   }
+  
 
   @override
 Widget build(BuildContext context){
