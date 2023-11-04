@@ -1,11 +1,15 @@
-
+import 'package:provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'login_page.dart';
-
+import 'package:flutter_login_layout/pages/login.dart';
+import 'data_app.dart';
 
 void main() {
-  runApp(const MyApp());
-
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => AppState(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

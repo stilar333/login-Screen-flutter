@@ -1,12 +1,14 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:dio/adapter.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:dio/dio.dart';
+import '../data_app.dart';
+import 'package:provider/provider.dart';
 
 class PictureScreen extends StatefulWidget {
-  
   const PictureScreen({key});
   @override
   State<PictureScreen> createState() => _PictureScreenState();
@@ -165,7 +167,6 @@ class _PictureScreenState extends State<PictureScreen> {
       ),
     );
   }
-  
 
   Future<void> guardarProducto() async {
     if (image != null) {
@@ -173,7 +174,7 @@ class _PictureScreenState extends State<PictureScreen> {
 
       await uploadFile(image);
       //lo comente porque me daba problema al subir la imagen
-     /*  showDialog(
+      /*  showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
@@ -215,55 +216,58 @@ class _PictureScreenState extends State<PictureScreen> {
     }
   }
 
-Future<Response> uploadFile(XFile? data) async {
-  try {
-    Dio dio = Dio();
-    dio.options.baseUrl = 'https://srv426423.hstgr.cloud:3000';
-    dio.options.headers['content-Type'] = 'multipart/form-data';
-    dio.options.headers['Accept'] = 'application/json';
-    dio.options.validateStatus = (status) => true;
+  Future<Response> uploadFile(XFile? data) async {
+    AppState appState = Provider.of<AppState>(context, listen: false);
+    try {
 
-    // Deshabilitar la verificación de certificados SSL
-    (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
-        (HttpClient client) {
-      client.badCertificateCallback =
-          (X509Certificate cert, String host, int port) => true;
-      return client;
-    };
+      Dio dio = Dio();
+      dio.options.baseUrl = 'https://srv426423.hstgr.cloud:3000';
+      dio.options.headers['content-Type'] = 'multipart/form-data';
+      dio.options.headers['Accept'] = 'application/json';
+      dio.options.validateStatus = (status) => true;
+      
+      // Deshabilitar la verificación de certificados SSL
+      (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
+          (HttpClient client) {
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
+        return client;
+      };
+      FormData formData = FormData.fromMap({
+        'photo': await MultipartFile.fromFile(data!.path,
+            filename: data.path.split('/').last),
+      });
+      String photoName = data.path.split('/').last;
+      appState.setPhotoName(photoName);
+      print(appState.photoName);
 
-    FormData formData = FormData.fromMap({
-      'photo': await MultipartFile.fromFile(data!.path,
-          filename: data.path.split('/').last),
-    });
+      Response response = await dio.post('/photos/upload', data: formData);
+      print('La imagen se subió con éxito');
+      print('Código de estado HTTP: ${response.statusCode}');
+      print('Respuesta del servidor: ${response.data}');
 
-     Response response = await dio.post('/photos/upload', data: formData);
-    print('La imagen se subió con éxito');
-    print('Código de estado HTTP: ${response.statusCode}');
-    print('Respuesta del servidor: ${response.data}');
+      // Mostrar mensaje de éxito
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('La imagen se ha subido exitosamente.'),
+          backgroundColor: Colors.green,
+        ),
+      );
 
-    // Mostrar mensaje de éxito
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('La imagen se ha subido exitosamente.'),
-        backgroundColor: Colors.green,
-      ),
-    );
+      return response;
+    } catch (error) {
+      print('Error al subir la imagen: $error');
 
-    return response;
-  } catch (error) {
-    print('Error al subir la imagen: $error');
-    
-    // Mostrar mensaje de error
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Hubo un error al subir la imagen. Por favor, inténtalo de nuevo.'),
-        backgroundColor: Colors.red,
-      ),
-    );
+      // Mostrar mensaje de error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Hubo un error al subir la imagen. Por favor, inténtalo de nuevo.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      throw error;
 
-    throw error;
+    }
   }
-}
-
-
 }
